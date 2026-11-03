@@ -3,71 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Barbearia Exemplo</title>
+<title>Para a Sarinha</title>
 <style>
-  :root { --fundo:#f3efe8; --texto:#1c2b2a; --destaque:#1f6f5c; --card:#ffffff; --borda:#d9d2c5; }
+  :root { --fundo:#fdeef0; --texto:#4a1f33; --rosa:#d6336c; --rosa-claro:#f9c9d6; --card:#fffafb; --suave:#8a5a6b; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--fundo); color:var(--texto);
-         font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif; line-height:1.5; }
-  main { max-width:440px; margin:0 auto; padding:32px 20px 48px; }
-  h1 { font-size:2rem; margin:0 0 6px; letter-spacing:-0.5px; }
-  .desc { margin:0 0 28px; color:#4a5857; }
-  .servico { display:flex; align-items:center; justify-content:space-between; gap:12px;
-             background:var(--card); border:1px solid var(--borda); border-radius:10px;
-             padding:14px 16px; margin-bottom:10px; text-decoration:none; color:inherit; }
-  .servico:hover, .servico:focus-visible { border-color:var(--destaque); outline:none; }
-  .servico b { display:block; font-size:1.05rem; }
-  .servico small { color:#4a5857; }
-  .preco { white-space:nowrap; font-weight:bold; color:var(--destaque); }
-  .extra { display:block; text-align:center; padding:12px; margin-top:10px; border-radius:10px;
-           border:1px solid var(--destaque); color:var(--destaque); text-decoration:none; font-weight:bold; }
-  .principal { background:var(--destaque); color:#fff; margin-top:22px; }
-  .horario { margin-top:26px; font-size:.9rem; color:#4a5857; text-align:center; }
+         font-family: "Palatino Linotype", Palatino, Georgia, serif; line-height:1.55; }
+  main { max-width:440px; margin:0 auto; padding:40px 20px 56px; text-align:center; }
+  h1 { font-size:2.4rem; margin:0 0 10px; font-weight:normal; font-style:italic; color:var(--rosa); }
+  .msg { margin:0 auto 18px; max-width:34ch; color:var(--suave); font-size:1.05rem; }
+  .dias { display:inline-block; margin-bottom:26px; padding:6px 16px; border-radius:999px;
+          background:var(--rosa-claro); color:var(--texto); font-size:.95rem; }
+  .vale { display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left;
+          background:var(--card); border:2px dashed var(--rosa-claro); border-radius:16px;
+          padding:14px 18px; margin-bottom:12px; text-decoration:none; color:inherit; }
+  .vale:hover, .vale:focus-visible { border-color:var(--rosa); outline:none; }
+  .vale b { display:block; font-size:1.1rem; }
+  .vale small { color:var(--suave); }
+  .valor { white-space:nowrap; font-style:italic; color:var(--rosa); font-size:.95rem; }
+  .botao { display:block; padding:14px; margin-top:12px; border-radius:999px; text-decoration:none;
+           font-weight:bold; border:2px solid var(--rosa); color:var(--rosa); }
+  .principal { background:var(--rosa); color:#fff; margin-top:26px; }
+  .rodape { margin-top:34px; font-size:.9rem; color:var(--suave); font-style:italic; }
+  .coracao { position:fixed; pointer-events:none; font-size:22px; z-index:10;
+             animation: sobe .9s ease-out forwards; }
+  @keyframes sobe { from { opacity:1; transform:translate(0,0) scale(.6); }
+                    to   { opacity:0; transform:translate(var(--dx),var(--dy)) scale(1.3); } }
+  @media (prefers-reduced-motion: reduce) { .coracao { display:none; } }
 </style>
 </head>
 <body>
 <main>
-  <h1 id="nome"></h1>
-  <p class="desc" id="desc"></p>
-  <div id="servicos"></div>
+  <h1 id="titulo"></h1>
+  <p class="msg" id="msg"></p>
+  <div class="dias" id="dias" hidden></div>
+  <div id="vales"></div>
   <div id="extras"></div>
-  <p class="horario" id="horario"></p>
+  <p class="rodape" id="rodape"></p>
 </main>
 
 <script>
-/* ===== EDITE SÓ ESTE BLOCO PARA CADA CLIENTE ===== */
-const cliente = {
-  nome: "Site da sarinha!",
-  descricao: "Corte, barba e acabamento. Atendimento com hora marcada.",
+/* ===== EDITE SÓ ESTE BLOCO ===== */
+const c = {
+  para: "Sarinha",
+  de: "João Paulo",
+  mensagem: "Fiz isso pensando em você. Toque num vale pra resgatar, e eu recebo no meu WhatsApp.",
   whatsapp: "5585981287445",
-  horario: "Seg a Sáb, 9h às 19h",
-  servicos: [
-    { nome: "Beijão na sarinha", detalhe: "Beijo beijo", preco: "R$ 35" },
-    { nome: "Beijinho", detalhe: "Beijo pequeno", preco: "R$ 25" },
-    { nome: "Beijão + Beijinho", detalhe: "Combo completo de beijos", preco: "R$ 55" }
+  inicio: "",   // data que vocês começaram, no formato AAAA-MM-DD (ex.: "2024-06-15"). Deixe "" para esconder.
+  vales: [
+    { emoji: "💋", nome: "Beijão",           detalhe: "Longo e sem pressa",    valor: "grátis" },
+    { emoji: "😘", nome: "Beijinho",         detalhe: "Rápido, pra qualquer hora", valor: "grátis" },
+    { emoji: "💞", nome: "Beijão + beijinho", detalhe: "O combo completo",      valor: "grátis" },
+    { emoji: "🤗", nome: "Abraço apertado",  detalhe: "Dura o tempo que você quiser", valor: "grátis" },
+    { emoji: "🍕", nome: "Date de comida",   detalhe: "Você escolhe o lugar",  valor: "por minha conta" }
   ],
   links: [
-    { texto: "Como chegar", url: "https://www.google.com/maps/place/R.+Francisca+Elizabete,+898+-+Maraponga,+Fortaleza+-+CE,+60711-420/@-3.7927617,-38.5759134,17z/data=!3m1!4b1!4m5!3m4!1s0x7c74c2be6cc4227:0x4dce868fd7e924fa!8m2!3d-3.7927617!4d-38.5733385?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D" },
+    { texto: "Ver nossas fotos 📸", url: "" }   // coloque um link (Google Fotos, Instagram...) ou deixe "" para esconder
   ]
 };
-/* ================================================== */
+/* =============================== */
 
-const wa = (msg) => "https://wa.me/" + cliente.whatsapp + "?text=" + encodeURIComponent(msg);
+const wa = (m) => "https://wa.me/" + c.whatsapp + "?text=" + encodeURIComponent(m);
+const $ = (id) => document.getElementById(id);
 
-document.title = cliente.nome;
-document.getElementById("nome").textContent = cliente.nome;
-document.getElementById("desc").textContent = cliente.descricao;
-document.getElementById("horario").textContent = cliente.horario;
+document.title = "Para a " + c.para;
+$("titulo").textContent = "Para a " + c.para + " 💗";
+$("msg").textContent = c.mensagem;
+$("rodape").textContent = "Feito com carinho por " + c.de;
 
-document.getElementById("servicos").innerHTML = cliente.servicos.map(s =>
-  `<a class="servico" href="${wa("Olá! Vim pelo site e quero agendar: " + s.nome)}">
-     <span><b>${s.nome}</b><small>${s.detalhe}</small></span>
-     <span class="preco">${s.preco}</span>
+if (c.inicio) {
+  const d = Math.floor((Date.now() - new Date(c.inicio + "T00:00:00")) / 864e5);
+  if (d >= 0) { $("dias").textContent = "Juntos há " + d + " dias"; $("dias").hidden = false; }
+}
+
+$("vales").innerHTML = c.vales.map(v =>
+  `<a class="vale" href="${wa("Oi amor! Resgatei o vale: " + v.nome + " 💗")}">
+     <span><b>${v.emoji} ${v.nome}</b><small>${v.detalhe}</small></span>
+     <span class="valor">${v.valor}</span>
    </a>`).join("");
 
-document.getElementById("extras").innerHTML =
-  `<a class="extra principal" href="${wa("Olá! Vim pelo site.")}">Chamar no WhatsApp</a>` +
-  cliente.links.map(l => `<a class="extra" href="${l.url}">${l.texto}</a>`).join("");
+$("extras").innerHTML =
+  `<a class="botao principal" href="${wa("Oi amor! Vi o seu site e amei 💗")}">Mandar um oi pra ele</a>` +
+  c.links.filter(l => l.url).map(l => `<a class="botao" href="${l.url}">${l.texto}</a>`).join("");
+
+function chuva(x, y) {
+  const lista = ["💗", "💖", "💕", "💘"];
+  for (let i = 0; i < 8; i++) {
+    const s = document.createElement("span");
+    s.className = "coracao";
+    s.textContent = lista[i % lista.length];
+    s.style.left = x + "px";
+    s.style.top = y + "px";
+    s.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+    s.style.setProperty("--dy", (-60 - Math.random() * 90) + "px");
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 900);
+  }
+}
+
+$("vales").addEventListener("click", (e) => {
+  const a = e.target.closest("a.vale");
+  if (!a) return;
+  e.preventDefault();
+  chuva(e.clientX, e.clientY);
+  const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(() => { location.href = a.href; }, reduzido ? 0 : 550);
+});
 </script>
 </body>
 </html>
